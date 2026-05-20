@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz 7 — Functions · Scope Quiz | Smart Life Course</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0b0f1a;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:20px 16px 48px}
+.container{width:100%;max-width:700px}
+.screen{display:none}.screen.active{display:block}
+
+/* ── Registration ── */
+.reg-card{background:#1a1a2e;border-radius:16px;padding:36px 28px;text-align:center;border:1px solid #2d2d4e}
+.logo{font-size:28px;font-weight:700;color:#fff;margin-bottom:4px}
+.logo span{color:#009688}
+.topic-pill{display:inline-block;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:20px;background:#00968822;color:#009688;border:1px solid #00968855}
+.field-label{font-size:13px;color:#aaa;text-align:left;margin-bottom:6px;display:block}
+.field-input{width:100%;padding:13px 15px;border-radius:10px;border:2px solid #2d2d4e;background:#0d0d1f;color:#fff;font-size:16px;font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:12px}
+.field-input:focus{border-color:#009688}
+.field-input::placeholder{color:#444}
+.start-btn{width:100%;margin-top:6px;padding:15px;background:#009688;border:none;border-radius:10px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;opacity:1;transition:opacity .15s}
+.start-btn:hover{opacity:.85}.start-btn:disabled{opacity:.35;cursor:not-allowed}
+.reg-stats{margin-top:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.reg-stat{background:#0d0d1f;border-radius:10px;padding:10px 6px;font-size:11px;color:#666;text-align:center}
+.reg-stat strong{display:block;font-size:18px;font-weight:700;color:#009688;margin-bottom:2px}
+.type-legend{margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.type-badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600}
+.tb-mcq{background:#1368ce22;color:#5b9fd4;border:1px solid #1368ce44}
+.tb-tf{background:#26890c22;color:#5db85d;border:1px solid #26890c44}
+.tb-dbg{background:#e21b3c22;color:#e27b8d;border:1px solid #e21b3c44}
+
+/* ── Quiz header ── */
+.quiz-top{background:#1a1a2e;border-radius:14px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;border:1px solid #2d2d4e}
+.player-label{font-size:10px;color:#009688;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.player-name{font-size:14px;color:#fff;font-weight:600}
+.prog-wrap{flex:1;margin:0 14px}
+.prog-label{font-size:11px;color:#666;margin-bottom:3px;text-align:center}
+.prog-bar{height:7px;background:#0d0d1f;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:#009688;border-radius:4px;transition:width .4s}
+.score-box{text-align:right}
+.score-label{font-size:10px;color:#888}
+.score-val{font-size:20px;font-weight:700;color:#fff;display:block}
+
+/* ── Timer row ── */
+.timer-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.timer-circle{width:52px;height:52px;border-radius:50%;background:#1a1a2e;border:3px solid #009688;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#009688;transition:all .3s;flex-shrink:0}
+.timer-circle.urgent{border-color:#e94560;color:#e94560}
+.streak-msg{font-size:12px;color:#009688;flex:1;text-align:center;font-weight:600}
+
+/* ── Question card ── */
+.q-card{background:#1a1a2e;border-radius:14px;padding:18px 20px;margin-bottom:10px;border:1px solid #2d2d4e}
+.q-top-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.topic-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:#00968822;color:#009688;border:1px solid #00968844;text-transform:uppercase;letter-spacing:.06em}
+.q-type-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px}
+.qtb-mcq{background:#1368ce22;color:#5b9fd4;border:1px solid #1368ce44}
+.qtb-tf{background:#26890c22;color:#5db85d;border:1px solid #26890c44}
+.qtb-debug{background:#e21b3c22;color:#e27b8d;border:1px solid #e21b3c44}
+.q-num{font-size:11px;color:#555;margin-left:auto}
+.q-text{font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;margin-bottom:10px}
+
+/* ── Debug code block ── */
+.code-block{background:#0a0f1c;border:1px solid #1e3a5f;border-radius:10px;padding:14px 16px;margin:10px 0;font-family:'Courier New',monospace;font-size:13px;color:#7ec8e3;line-height:1.8;white-space:pre;overflow-x:auto;text-align:left}
+.code-label{font-size:10px;font-weight:700;color:#e94560;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.code-label::before{content:'🐛';font-size:12px}
+
+/* ── Answers ── */
+.answers-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.answers-grid.tf-grid{grid-template-columns:1fr 1fr;max-width:400px;margin:0 auto 10px}
+@media(max-width:480px){.answers-grid{grid-template-columns:1fr}}
+.ans-btn{padding:13px 14px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#fff;text-align:left;display:flex;align-items:center;gap:9px;transition:transform .1s,opacity .2s;line-height:1.4;font-family:inherit;width:100%}
+.ans-btn:hover{transform:scale(1.02)}.ans-btn:active{transform:scale(0.98)}
+.ans-btn.a{background:#e21b3c}.ans-btn.b{background:#1368ce}
+.ans-btn.c{background:#d89e00}.ans-btn.d{background:#26890c}
+.ans-btn.correct{outline:4px solid #fff;opacity:1!important}
+.ans-btn.wrong{opacity:.25}.ans-btn.locked{cursor:default;pointer-events:none}
+.ans-icon{width:28px;height:28px;border-radius:5px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+
+/* ── True/False special styling ── */
+.tf-true{background:#26890c!important;font-size:15px;justify-content:center;font-weight:700}
+.tf-false{background:#e21b3c!important;font-size:15px;justify-content:center;font-weight:700}
+
+/* ── Feedback ── */
+.feedback-box{text-align:center;padding:10px 14px;border-radius:10px;margin-bottom:8px;font-size:13px;font-weight:600;display:none}
+.feedback-box.ok{background:#1a3d1a;color:#46d39a;border:1px solid #46d39a;display:block}
+.feedback-box.no{background:#3d1a1a;color:#ff6b6b;border:1px solid #e94560;display:block}
+.exp-box{font-size:12px;color:#777;text-align:center;margin-bottom:8px;min-height:16px;line-height:1.6;padding:0 4px}
+.next-btn{width:100%;padding:13px;background:#009688;border:none;border-radius:10px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;display:none;font-family:inherit;transition:opacity .15s}
+.next-btn:hover{opacity:.85}
+
+/* ── Submitting ── */
+.sub-wrap{padding:60px 0;text-align:center}
+.spinner{width:50px;height:50px;border:4px solid #2d2d4e;border-top-color:#009688;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sub-title{font-size:20px;font-weight:600;color:#fff;margin-bottom:6px}
+.sub-sub{font-size:14px;color:#777}
+.sub-err{font-size:13px;color:#e94560;margin-top:14px;display:none;line-height:1.6}
+
+/* ── Done ── */
+.done-card{background:#1a1a2e;border-radius:16px;padding:32px 24px;text-align:center;border:1px solid #2d2d4e}
+.done-trophy{font-size:50px;margin-bottom:10px}
+.done-name{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px}
+.done-sent{font-size:13px;color:#009688;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:6px}
+.done-score{font-size:56px;font-weight:800;color:#009688;line-height:1}
+.done-pts{font-size:12px;color:#555;margin-bottom:6px}
+.done-correct{font-size:15px;color:#ccc;margin-bottom:20px}
+.done-grade{font-size:14px;font-weight:600;padding:9px 20px;border-radius:10px;display:inline-block;margin-bottom:20px}
+.done-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px}
+.done-stat{background:#0d0d1f;border-radius:10px;padding:12px 6px;text-align:center}
+.done-stat-val{font-size:20px;font-weight:700;color:#009688;display:block}
+.done-stat-lbl{font-size:11px;color:#666;margin-top:2px}
+.done-breakdown{margin-bottom:16px;text-align:left}
+.done-bd-title{font-size:12px;color:#666;margin-bottom:8px;text-align:center;text-transform:uppercase;letter-spacing:.06em}
+.done-bd-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #2d2d4e;font-size:12px}
+.done-bd-row span:first-child{color:#888}
+.done-bd-row span:last-child{color:#fff;font-weight:600}
+.done-notice{font-size:12px;color:#555;padding:12px;background:#0d0d1f;border-radius:10px;border:1px solid #2d2d4e;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- REGISTRATION -->
+<div id="regScreen" class="screen active">
+  <div class="reg-card">
+    <div class="logo">Smart<span>Life</span> Quiz</div>
+    <div class="topic-pill">Quiz 7 &mdash; Functions · Scope</div>
+    <label class="field-label" for="nameIn">Your full name</label>
+    <input class="field-input" id="nameIn" type="text" placeholder="e.g. Ahmed Al Rashid" maxlength="40" oninput="chk()" onkeydown="if(event.key==='Enter')document.getElementById('classIn').focus()">
+    <label class="field-label" for="classIn">Your class / grade</label>
+    <input class="field-input" id="classIn" type="text" placeholder="e.g. Grade 5A" maxlength="30" oninput="chk()" onkeydown="if(event.key==='Enter')go()">
+    <button class="start-btn" id="startBtn" onclick="go()" disabled>Start Quiz &rarr;</button>
+    <div class="reg-stats">
+      <div class="reg-stat"><strong>20</strong>Questions</div>
+      <div class="reg-stat"><strong>20s</strong>Per question</div>
+      <div class="reg-stat"><strong>1000</strong>Max pts each</div>
+    </div>
+    <div class="type-legend">
+      <span class="type-badge tb-mcq">&#9654; Multiple Choice</span>
+      <span class="type-badge tb-tf">&#10003; True / False</span>
+      <span class="type-badge tb-dbg">&#128027; Debug the Code</span>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quizScreen" class="screen">
+  <div class="quiz-top">
+    <div><div class="player-label">Playing as</div><div class="player-name" id="pNameDisplay">&mdash;</div></div>
+    <div class="prog-wrap"><div class="prog-label" id="progLabel">1 / 20</div><div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div></div>
+    <div class="score-box"><div class="score-label">Score</div><span class="score-val" id="scoreVal">0</span></div>
+  </div>
+  <div class="timer-row">
+    <div class="timer-circle" id="timerEl">20</div>
+    <div class="streak-msg" id="streakEl"></div>
+    <div style="width:52px"></div>
+  </div>
+  <div class="q-card">
+    <div class="q-top-row">
+      <div class="topic-badge" id="badgeEl">Quiz 7</div>
+      <div class="q-type-badge" id="typeBadgeEl"></div>
+      <div class="q-num" id="qNumEl">Q1</div>
+    </div>
+    <div class="q-text" id="qTextEl">Loading&hellip;</div>
+    <div id="codeBlockWrap" style="display:none">
+      <div class="code-label">Debug this code</div>
+      <div class="code-block" id="codeBlockEl"></div>
+    </div>
+  </div>
+  <div class="answers-grid" id="ansGrid"></div>
+  <div class="feedback-box" id="fbEl"></div>
+  <div class="exp-box" id="expEl"></div>
+  <button class="next-btn" id="nextBtn" onclick="nextQ()">Next &rarr;</button>
+</div>
+
+<!-- SUBMITTING -->
+<div id="subScreen" class="screen">
+  <div class="sub-wrap">
+    <div class="spinner"></div>
+    <div class="sub-title">Submitting your results&hellip;</div>
+    <div class="sub-sub">Sending to your teacher &mdash; please wait</div>
+    <div class="sub-err" id="subErr"></div>
+  </div>
+</div>
+
+<!-- DONE -->
+<div id="doneScreen" class="screen">
+  <div class="done-card">
+    <div class="done-trophy">&#127881;</div>
+    <div class="done-name" id="doneName">Well done!</div>
+    <div class="done-sent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Results sent to your teacher</div>
+    <div class="done-score" id="doneScore">0</div>
+    <div class="done-pts">total points</div>
+    <div class="done-correct" id="doneCorrect">0 of 20 correct</div>
+    <div class="done-grade" id="doneGrade"></div>
+    <div class="done-stats">
+      <div class="done-stat"><span class="done-stat-val" id="dsPct">0%</span><div class="done-stat-lbl">Accuracy</div></div>
+      <div class="done-stat"><span class="done-stat-val" id="dsStreak">0</span><div class="done-stat-lbl">Best streak</div></div>
+      <div class="done-stat"><span class="done-stat-val" id="dsTime">0s</span><div class="done-stat-lbl">Avg time</div></div>
+    </div>
+    <div class="done-breakdown">
+      <div class="done-bd-title">Score by question type</div>
+      <div class="done-bd-row"><span>Multiple Choice</span><span id="bdMCQ">—</span></div>
+      <div class="done-bd-row"><span>True / False</span><span id="bdTF">—</span></div>
+      <div class="done-bd-row"><span>Debug the Code</span><span id="bdDBG">—</span></div>
+    </div>
+    <div class="done-notice">Results submitted to your teacher&apos;s spreadsheet.<br>Nothing to download or edit. Great work completing the quiz!</div>
+  </div>
+</div>
+
+</div><!-- /container -->
+<script>
+const SHEET_URL="https://script.google.com/macros/s/AKfycbzINPtvN4yUPPzw4eIz1iw9X5hriLT9YrKPaveE7qVzto4seDOQEgBn_85zRK4kjCw3/exec";
+const QUIZ_TOPIC="Quiz 7 \u2014 Functions · Scope";
+const ICONS=['\u25cf','\u25a0','\u25b2','\u25c6'],COLS=['a','b','c','d'];
+const ALL_Q=[{"type": "mcq", "q": "What keyword is used to define a function in Python?", "ans": ["function", "func", "define", "def"], "c": 3, "exp": "'def' defines a function in Python. Syntax: def function_name(parameters): followed by an indented body. 'def' is short for 'define'. Functions allow code reuse and organisation."}, {"type": "tf", "q": "A Python function must always return a value using the 'return' statement.", "ans": ["True", "False"], "c": 1, "exp": "FALSE. return is optional. A function without return (or with bare 'return') automatically returns None. Functions can perform actions (print, modify) without needing to return a value."}, {"type": "mcq", "q": "What is the output of:\ndef greet(name='World'):\n    print(f'Hello, {name}!')\ngreet()", "ans": ["Error — name not provided", "Hello, !", "Hello, World!", "Hello, name!"], "c": 2, "exp": "'World' is a DEFAULT parameter — it's used when no argument is passed. greet() uses the default: 'Hello, World!'. greet('Sara') overrides it: 'Hello, Sara!'. Default parameters make functions more flexible."}, {"type": "debug", "q": "The function should return the sum but always returns None:", "code": "def add(a, b):\n    total = a + b\n\nresult = add(3, 4)\nprint(result)", "ans": ["Missing 'return total' inside the function — without return, the function returns None by default", "Change def to function", "Remove the = in total = a + b", "Change print to return"], "c": 0, "exp": "The function calculates total but never returns it — so it returns None. Add 'return total' as the last line of the function. Without return, print(result) outputs 'None'."}, {"type": "mcq", "q": "What does *args allow in a function definition?", "ans": ["Accepts exactly 2 arguments", "Accepts any number of positional arguments as a tuple", "Accepts only keyword arguments", "Makes the argument optional"], "c": 1, "exp": "*args allows a function to accept ANY number of positional arguments, collected into a tuple. def add(*nums): return sum(nums) — works with add(1,2), add(1,2,3,4,5), etc. 'args' is convention; * is what matters."}, {"type": "tf", "q": "A local variable defined inside a function is accessible outside the function.", "ans": ["True", "False"], "c": 1, "exp": "FALSE. Local variables only exist inside their function — they are destroyed when the function returns. Trying to access a local variable outside its function raises a NameError. This is the concept of scope."}, {"type": "mcq", "q": "What is a docstring in Python?", "ans": ["A string that documents what a function does — written as the first statement inside using triple quotes", "A comment that appears in the output", "A special debug string", "A string that returns automatically"], "c": 0, "exp": "Docstrings: def my_func(): \"\"\"This function does X and Y.\"\"\". Accessible via my_func.__doc__. Used by IDEs for help hints and by documentation tools. Best practice: always document your functions."}, {"type": "debug", "q": "The function tries to modify a global variable but doesn't work:", "code": "count = 0\ndef increment():\n    count = count + 1\nincrement()\nprint(count)", "ans": ["Without 'global count' declaration inside the function, Python treats count as a new local variable — add 'global count' as the first line inside increment()", "Change count to 0", "Remove the function", "Add return count"], "c": 0, "exp": "Without 'global count', Python creates a NEW local variable count inside increment() — the global count is unchanged. Add 'global count' inside the function to tell Python to use the global variable."}, {"type": "mcq", "q": "What does **kwargs allow in a function?", "ans": ["Accepts any number of positional arguments", "Accepts any number of KEYWORD arguments as a dictionary", "Requires all arguments to have defaults", "Prevents any arguments from being passed"], "c": 1, "exp": "**kwargs collects any number of keyword arguments into a dict. def show(**info): print(info) — show(name='Sara', age=25) gives {'name':'Sara','age':25}. Combine: def f(*args, **kwargs) for maximum flexibility."}, {"type": "tf", "q": "Lambda functions in Python are anonymous — they can have multiple lines of code.", "ans": ["True", "False"], "c": 1, "exp": "FALSE. Lambda functions are anonymous and limited to a SINGLE EXPRESSION (one line). Syntax: lambda x: x*2. Useful for short operations inline. For multiple lines, use a regular def function."}, {"type": "mcq", "q": "What is the output of:\nsquare = lambda x: x ** 2\nprint(square(5))", "ans": ["x ** 2", "25", "10", "Error"], "c": 1, "exp": "lambda x: x**2 creates an anonymous function. Calling square(5) computes 5**2 = 25. Lambdas are often used with sorted(), map(), filter() for concise operations without defining a full function."}, {"type": "debug", "q": "The recursive function runs forever and crashes. Find the bug:", "code": "def countdown(n):\n    print(n)\n    countdown(n - 1)", "ans": ["Missing base case — add 'if n <= 0: return' at the start to stop recursion when n reaches 0 or below", "Change n-1 to n+1", "Add a print after the call", "Remove the function call"], "c": 0, "exp": "Recursion without a base case runs infinitely until Python hits the recursion limit (RecursionError). Fix: add 'if n <= 0: return' — this stops the chain when n reaches 0. Every recursive function MUST have a base case."}, {"type": "mcq", "q": "What is the scope of a variable defined at the top of a Python file (outside all functions)?", "ans": ["Local scope", "Function scope", "Global scope", "Module scope (accessible throughout the file)"], "c": 3, "exp": "Variables at file level have module/global scope — accessible anywhere in the file. Inside functions, they're readable but not modifiable without 'global' keyword. Global variables should be used sparingly."}, {"type": "tf", "q": "You can call a function before it is defined in Python (like in JavaScript hoisting).", "ans": ["True", "False"], "c": 1, "exp": "FALSE. Python reads code top to bottom. If you call a function before its def statement, Python raises a NameError. Unlike JavaScript, Python doesn't 'hoist' function definitions. Always define before calling."}, {"type": "mcq", "q": "What does the map() function do?", "ans": ["Creates a map/dictionary", "Applies a function to EVERY item in an iterable and returns a map object", "Finds the location of an item", "Draws a visual map"], "c": 1, "exp": "map(function, iterable) applies the function to each element. list(map(lambda x: x*2, [1,2,3])) = [2,4,6]. More concise than a for loop. map() is lazy — doesn't compute until converted to list or iterated."}, {"type": "debug", "q": "The function has two return statements but one is unreachable:", "code": "def check(x):\n    return 'Positive'\n    if x < 0:\n        return 'Negative'", "ans": ["'return Positive' exits the function immediately — the if block is UNREACHABLE dead code. Move the if check before the return or restructure the logic", "Add else before return", "Remove the if block", "Change return to print"], "c": 0, "exp": "Code after a return statement is unreachable — execution leaves the function at the first return. Fix: if x < 0: return 'Negative'; return 'Positive'. The positive case should be the fallback, not the first return."}, {"type": "mcq", "q": "What is a higher-order function?", "ans": ["A function with many parameters", "A function that takes another function as argument OR returns a function", "A function that runs faster than normal", "A function defined inside a class"], "c": 1, "exp": "Higher-order functions: map(), filter(), sorted(key=func) all take functions as arguments. A function that returns another function is also higher-order. This enables functional programming patterns in Python."}, {"type": "tf", "q": "The filter() function returns all items from an iterable that satisfy a given condition (return True).", "ans": ["True", "False"], "c": 0, "exp": "TRUE. filter(function, iterable) keeps items where function returns True. list(filter(lambda x: x > 3, [1,2,3,4,5])) = [4,5]. Like map(), filter() is lazy and returns a filter object — convert with list()."}, {"type": "mcq", "q": "What happens when a function returns multiple values?", "ans": ["Error — functions can only return one value", "They are returned as a tuple — a, b = my_func() unpacks them", "Only the first value is returned", "They are returned as a list"], "c": 1, "exp": "def min_max(lst): return min(lst), max(lst) returns a TUPLE. a, b = min_max([1,2,3]) unpacks into a=1, b=3. Returning multiple values is a very Pythonic pattern — tuples are automatically created and unpacked."}, {"type": "mcq", "q": "What is the purpose of the 'pass' statement in a function definition?", "ans": ["Ends the function", "Returns None explicitly", "Acts as a placeholder so the function body is syntactically valid but does nothing", "Passes arguments to parent function"], "c": 2, "exp": "def empty_func(): pass — creates a valid function that does nothing. Used as a stub/placeholder during development to define a function structure before implementing it. Without pass, an empty def raises IndentationError."}];
+
+let pName='',pClass='',questions=[],cur=0,score=0;
+let streak=0,bestStreak=0,answered=false;
+let timer=20,timerInt=null;
+let results=[],timeTaken=[],qStart=0;
+let typeTally={mcq:{c:0,t:0},tf:{c:0,t:0},debug:{c:0,t:0}};
+
+function $(i){return document.getElementById(i)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active')}
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+
+function chk(){
+  const n=$('nameIn').value.trim(),c=$('classIn').value.trim();
+  $('startBtn').disabled=n.length<2||c.length<1;
+}
+function go(){
+  pName=$('nameIn').value.trim();pClass=$('classIn').value.trim();
+  if(pName.length<2||pClass.length<1)return;
+  $('pNameDisplay').textContent=pName;
+  questions=shuffle(ALL_Q);cur=0;score=0;streak=0;bestStreak=0;
+  results=[];timeTaken=[];typeTally={mcq:{c:0,t:0},tf:{c:0,t:0},debug:{c:0,t:0}};
+  show('quizScreen');renderQ();
+}
+
+function renderQ(){
+  answered=false;
+  const q=questions[cur];
+  $('progFill').style.width=Math.round(cur/questions.length*100)+'%';
+  $('progLabel').textContent=(cur+1)+' / '+questions.length;
+  $('qNumEl').textContent='Q'+(cur+1)+' of '+questions.length;
+  $('qTextEl').textContent=q.q;
+  $('fbEl').className='feedback-box';$('expEl').textContent='';
+  $('nextBtn').style.display='none';
+  $('streakEl').textContent=streak>=2?streak+' in a row! \uD83D\uDD25':'';
+
+  // Type badge
+  const tb=$('typeBadgeEl');
+  if(q.type==='mcq'){tb.textContent='\u25B6 Multiple Choice';tb.className='q-type-badge qtb-mcq';}
+  else if(q.type==='tf'){tb.textContent='\u2713 True / False';tb.className='q-type-badge qtb-tf';}
+  else{tb.textContent='\uD83D\uDC1B Debug the Code';tb.className='q-type-badge qtb-debug';}
+
+  // Code block for debug questions
+  const cw=$('codeBlockWrap');
+  if(q.type==='debug' && q.code){
+    $('codeBlockEl').textContent=q.code;
+    cw.style.display='block';
+  }else{cw.style.display='none';}
+
+  // Build answer buttons
+  const grid=$('ansGrid');grid.innerHTML='';
+  if(q.type==='tf'){
+    grid.className='answers-grid tf-grid';
+    const pairs=[[0,'tf-true','\u2714  True'],[1,'tf-false','\u2718  False']];
+    pairs.forEach(([orig,cls,label])=>{
+      const btn=document.createElement('button');
+      btn.className='ans-btn '+cls;
+      btn.innerHTML=label;
+      btn.dataset.orig=orig;
+      btn.onclick=()=>pick(btn,orig===q.c,q);
+      grid.appendChild(btn);
+    });
+  }else{
+    grid.className='answers-grid';
+    const idxs=shuffle([0,1,2,3]);
+    idxs.forEach((orig,pos)=>{
+      const btn=document.createElement('button');
+      btn.className='ans-btn '+COLS[pos];
+      btn.innerHTML='<span class="ans-icon">'+ICONS[pos]+'</span>'+q.ans[orig];
+      btn.dataset.orig=orig;
+      btn.onclick=()=>pick(btn,orig===q.c,q);
+      grid.appendChild(btn);
+    });
+  }
+  qStart=Date.now();startTimer();
+}
+
+function startTimer(){
+  clearInterval(timerInt);timer=20;updTimer();
+  timerInt=setInterval(()=>{timer--;updTimer();if(timer<=0){clearInterval(timerInt);timeUp();}},1000);
+}
+function updTimer(){
+  $('timerEl').textContent=timer;
+  $('timerEl').className='timer-circle'+(timer<=5?' urgent':'');
+}
+function timeUp(){
+  if(answered)return;answered=true;streak=0;
+  revealAll(null);
+  $('fbEl').textContent="Time's up!";$('fbEl').className='feedback-box no';
+  $('expEl').textContent=questions[cur].exp;$('nextBtn').style.display='block';
+  const q=questions[cur];const tk=q.type==='debug'?'debug':q.type;
+  typeTally[tk].t++;
+  results.push({type:q.type,ok:false,pts:0,t:20});
+}
+function pick(btn,isOk,q){
+  if(answered)return;answered=true;clearInterval(timerInt);
+  const el=Math.round((Date.now()-qStart)/1000);timeTaken.push(el);
+  const pts=isOk?Math.max(500,timer*50):0;
+  if(isOk){score+=pts;streak++;bestStreak=Math.max(bestStreak,streak);}else streak=0;
+  $('scoreVal').textContent=score.toLocaleString();
+  const tk=q.type==='debug'?'debug':q.type;
+  typeTally[tk].t++;if(isOk)typeTally[tk].c++;
+  revealAll(btn);
+  $('fbEl').textContent=isOk?(streak>=3?'Correct! +'+pts.toLocaleString()+' \u2014 '+streak+' streak! \uD83D\uDD25':'Correct! +'+pts.toLocaleString()+' pts'):'Not quite!';
+  $('fbEl').className='feedback-box '+(isOk?'ok':'no');
+  $('expEl').textContent=q.exp;
+  $('streakEl').textContent=streak>=2?streak+' in a row! \uD83D\uDD25':'';
+  $('nextBtn').style.display='block';
+  results.push({type:q.type,ok:isOk,pts:pts,t:el});
+}
+function revealAll(sel){
+  const q=questions[cur];
+  if(q.type==='tf'){
+    document.querySelectorAll('.ans-btn').forEach(b=>{
+      b.style.pointerEvents='none';
+      const orig=parseInt(b.dataset.orig);
+      if(orig===q.c){b.style.outline='4px solid #fff';}
+      else if(b===sel||sel===null){b.style.opacity='.25';}
+      else{b.style.opacity='.25';}
+    });
+  }else{
+    document.querySelectorAll('.ans-btn').forEach(b=>{
+      b.classList.add('locked');
+      b.classList.add(parseInt(b.dataset.orig)===q.c?'correct':'wrong');
+    });
+  }
+}
+function nextQ(){cur++;if(cur>=questions.length)submitResults();else renderQ();}
+
+async function submitResults(){
+  show('subScreen');
+  const correct=results.filter(r=>r.ok).length;
+  const pct=Math.round(correct/questions.length*100);
+  const avgTime=timeTaken.length?Math.round(timeTaken.reduce((a,b)=>a+b,0)/timeTaken.length):0;
+  const grade=pct>=90?'Excellent':pct>=70?'Great':pct>=50?'Good':'Needs Practice';
+  const now=new Date();
+  const qLog=results.map((r,i)=>'Q'+(i+1)+'['+r.type+']['+(r.ok?'Y':'N')+']'+r.pts+'pts').join('|');
+  const bdStr=
+    'MCQ:'+typeTally.mcq.c+'/'+typeTally.mcq.t+' '+
+    'TF:'+typeTally.tf.c+'/'+typeTally.tf.t+' '+
+    'Debug:'+typeTally.debug.c+'/'+typeTally.debug.t;
+  const payload={
+    studentName:pName,className:pClass,quizTopic:QUIZ_TOPIC,
+    date:now.toLocaleDateString('en-GB'),
+    time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    totalScore:score,correct:correct,totalQuestions:questions.length,
+    accuracy:pct,grade:grade,bestStreak:bestStreak,avgTimeSec:avgTime,
+    topicBreakdown:bdStr,questionLog:qLog,
+  };
+  try{
+    await fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }catch(err){
+    $('subErr').innerHTML='Could not submit. Please tell your teacher.<br><small>'+err.message+'</small>';
+    $('subErr').style.display='block';
+  }
+  showDone(correct,pct,avgTime,grade);
+}
+function showDone(correct,pct,avgTime,grade){
+  show('doneScreen');
+  $('doneName').textContent='Well done, '+pName+'!';
+  $('doneScore').textContent=score.toLocaleString();
+  $('doneCorrect').textContent=correct+' of '+questions.length+' correct';
+  $('dsPct').textContent=pct+'%';$('dsStreak').textContent=bestStreak;$('dsTime').textContent=avgTime+'s';
+  const m={Excellent:['#1a3d1a','#46d39a','Excellent \u2014 Master Coder! \uD83C\uDFC6'],
+             Great:['#1a2e3d','#5bc0eb','Great work! Keep it up! \uD83D\uDC4F'],
+             Good:['#3d3d1a','#d89e00','Good effort \u2014 review and retry! \uD83D\uDCDA'],
+             'Needs Practice':['#3d1a1a','#ff6b6b','Keep practising \u2014 you\u2019ve got this! \uD83D\uDCAA']};
+  const[bg,col,lbl]=m[grade]||m['Needs Practice'];
+  const g=$('doneGrade');g.style.cssText='background:'+bg+';color:'+col+';padding:9px 20px;border-radius:10px';g.textContent=lbl;
+  $('bdMCQ').textContent=typeTally.mcq.c+'/'+typeTally.mcq.t;
+  $('bdTF').textContent=typeTally.tf.c+'/'+typeTally.tf.t;
+  $('bdDBG').textContent=typeTally.debug.c+'/'+typeTally.debug.t;
+}
+</script>
+</body>
+</html>
